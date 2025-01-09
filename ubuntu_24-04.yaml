@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Variables
+DISK_SIZE="25G"
+USERNAME="alumno"
+PASSWORD="Abc123."
+PASSWORD_HASH=$(echo "$PASSWORD" | mkpasswd -m sha-512 --stdin)
+CLOUD_INIT_FILE="user-data"
+
+# Generar archivo autoinstall
+cat > $CLOUD_INIT_FILE <<EOF
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: ubuntu
+    username: $USERNAME
+    password: $PASSWORD_HASH
+  storage:
+    layout:
+      name: direct
+    config:
+      - type: disk
+        id: disk0
+        size: $DISK_SIZE
+        device: /dev/sda
+  keyboard:
+    layout: "es"
+    variant: "es"
+  locale: "es_ES.UTF-8"
+  timezone: "Europe/Madrid"
+  packages:
+    - openssh-server
+  ssh:
+    allow-pw: true
+  apt:
+    preserve_sources_list: false
+  user-data:
+    disable_root: false
+EOF
+
+echo "Archivo de configuración autoinstall generado: $CLOUD_INIT_FILE"
+
+# Mensaje final
+echo "Coloca el archivo $CLOUD_INIT_FILE en un instalador de Ubuntu Server para una instalación desatendida."
